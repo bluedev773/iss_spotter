@@ -1,13 +1,8 @@
 const request = require('request');
 
-/**
- * Makes a single API request to retrieve the user's IP address.
- * Input:
- *   - A callback (to pass back an error or the IP string)
- * Returns (via Callback):
- *   - An error, if any (nullable)
- *   - The IP address as a string (null if error). Example: "162.245.144.188"
- */
+
+//Makes a single API request to retrieve the user's IP address.
+
 const fetchMyIP = function(callback) {
   // use request to fetch IP address from JSON API
   request('https://api.ipify.org?format=json', (error, response, body) => {
@@ -28,6 +23,8 @@ const fetchMyIP = function(callback) {
   });
 };
 
+
+//Makes a single API request to retrieve the user's geolocation coordinates.
 const fetchCoordsByIP = function(ip, callback) {
   request(`https://api.freegeoip.app/json/${ip}?apikey=e3956d60-53c6-11ec-a9e6-4d5eaa4d8a0b`, (error, response, body) => {
     //pass through the error to the callback if an error occurs when requesting the Coord data
@@ -48,4 +45,26 @@ const fetchCoordsByIP = function(ip, callback) {
   });
 };
 
-module.exports = { fetchMyIP, fetchCoordsByIP };
+
+ // Makes a single API request to retrieve upcoming ISS fly over times the for the given lat/lng coordinates.
+
+ const fetchISSFlyOverTimes = function(coords, callback) {
+  const url = `https://iss-pass.herokuapp.com/json/?lat=${coords.latitude}&lon=${coords.longitude}`;
+
+  request(url, (error, response, body) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    if (response.statusCode !== 200) {
+      callback(Error(`Status Code ${response.statusCode} when fetching ISS pass times: ${body}`), null);
+      return;
+    }
+
+    const passes = JSON.parse(body).response;
+    callback(null, passes);
+  });
+};
+
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
